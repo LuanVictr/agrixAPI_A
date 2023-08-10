@@ -6,6 +6,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+/**
+ * Cria a entidade Crop.
+ */
 @Entity
 @Table(name = "crop")
 public class Crop {
