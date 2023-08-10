@@ -3,6 +3,7 @@ package com.betrybe.agrix.service;
 import com.betrybe.agrix.model.entities.Farm;
 import com.betrybe.agrix.model.repositories.FarmRepository;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,8 +36,9 @@ public class FarmService {
     return createdFarm;
   }
 
-  public Farm getFarmById() {
-    Farm
+  public Optional<Farm> getFarmById(Long id) {
+    Optional<Farm> farmFound = this.farmRepository.findById(id);
+    return farmFound;
   }
 
 

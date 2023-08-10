@@ -1,14 +1,17 @@
 package com.betrybe.agrix.controller;
 
 import com.betrybe.agrix.controller.dto.FarmDto;
+import com.betrybe.agrix.controller.dto.ResponseDto;
 import com.betrybe.agrix.model.entities.Farm;
 import com.betrybe.agrix.service.FarmService;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.autoconfigure.observation.ObservationProperties.Http;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -59,6 +62,27 @@ public class FarmController {
   public ResponseEntity<List<Farm>> getAllFarms() {
     List<Farm> allFarms = this.farmService.getFarms();
     return ResponseEntity.status(HttpStatus.OK).body(allFarms);
+  }
+
+  /**
+   * Cria a rota GET /farms/id que retorna a farm buscada pelo id.
+   *
+   * @return retorna uma Farm do banco de dados.
+   */
+  @GetMapping("/{farmId}")
+  public ResponseEntity<ResponseDto<Farm>> getFarmById(@PathVariable Long farmId) {
+    Optional<Farm> farmToFound = this.farmService.getFarmById(farmId);
+
+    if (farmToFound.isEmpty()) {
+      ResponseDto<Farm> responseNotFound = new ResponseDto<>(
+          "Fazenda não encontrada!", null);
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseNotFound);
+    }
+
+    Farm farmFound = farmToFound.get();
+    ResponseDto<Farm> responseDto = new ResponseDto<Farm>(
+        "Fazenda encontrada com sucesso", farmFound);
+    return ResponseEntity.status(HttpStatus.OK).body(responseDto);
   }
 
 }
