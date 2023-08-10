@@ -50,6 +50,11 @@ public class FarmController {
     return ResponseEntity.status(HttpStatus.CREATED).body(createdFarm);
   }
 
+  /**
+   * Cria a rota GET /farms que retorna todas as farms registradas.
+   *
+   * @return retorna uma lista com todas as farms registradas
+   */
   @GetMapping
   public ResponseEntity<List<Farm>> getAllFarms() {
     List<Farm> allFarms = this.farmService.getFarms();

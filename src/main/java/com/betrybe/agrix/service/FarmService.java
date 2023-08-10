@@ -35,5 +35,9 @@ public class FarmService {
     return createdFarm;
   }
 
+  public Farm getFarmById() {
+    Farm
+  }
+
 
 }
