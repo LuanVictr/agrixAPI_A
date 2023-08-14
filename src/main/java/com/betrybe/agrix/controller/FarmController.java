@@ -4,6 +4,7 @@ import com.betrybe.agrix.controller.dto.CropResponseDto;
 import com.betrybe.agrix.controller.dto.CropsDto;
 import com.betrybe.agrix.controller.dto.FarmDto;
 import com.betrybe.agrix.controller.dto.ResponseDto;
+import com.betrybe.agrix.exceptions.FarmNotFoundException;
 import com.betrybe.agrix.model.entities.Crop;
 import com.betrybe.agrix.model.entities.Farm;
 import com.betrybe.agrix.service.CropService;
@@ -78,19 +79,20 @@ public class FarmController {
    * @return retorna uma Farm do banco de dados.
    */
   @GetMapping("/{farmId}")
-  public ResponseEntity<ResponseDto<Farm>> getFarmById(@PathVariable Long farmId) {
-    Optional<Farm> farmToFound = this.farmService.getFarmById(farmId);
+  public ResponseEntity getFarmById(@PathVariable Long farmId) throws FarmNotFoundException {
+    try {
+      Optional<Farm> farmToFound = this.farmService.getFarmById(farmId);
 
-    if (farmToFound.isEmpty()) {
-      ResponseDto<Farm> responseNotFound = new ResponseDto<>(
-          "Fazenda não encontrada!", null);
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseNotFound);
+      if (farmToFound.isEmpty()) {
+        throw new FarmNotFoundException();
+      }
+
+      Farm farmFound = farmToFound.get();
+      return ResponseEntity.status(HttpStatus.OK).body(farmFound);
+    } catch (FarmNotFoundException farmNotFoundException) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(farmNotFoundException.getMessage());
     }
 
-    Farm farmFound = farmToFound.get();
-    ResponseDto<Farm> responseDto = new ResponseDto<Farm>(
-        "Fazenda encontrada com sucesso", farmFound);
-    return ResponseEntity.status(HttpStatus.OK).body(responseDto);
   }
 
   /**
