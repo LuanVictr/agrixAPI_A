@@ -1,8 +1,12 @@
 package com.betrybe.agrix.controller;
 
+import com.betrybe.agrix.controller.dto.CropResponseDto;
+import com.betrybe.agrix.controller.dto.CropsDto;
 import com.betrybe.agrix.controller.dto.FarmDto;
 import com.betrybe.agrix.controller.dto.ResponseDto;
+import com.betrybe.agrix.model.entities.Crop;
 import com.betrybe.agrix.model.entities.Farm;
+import com.betrybe.agrix.service.CropService;
 import com.betrybe.agrix.service.FarmService;
 import java.util.List;
 import java.util.Optional;
@@ -26,16 +30,20 @@ import org.springframework.web.bind.annotation.RestController;
 public class FarmController {
 
   private FarmService farmService;
+  private CropService cropService;
 
   /**
    * Construtor da classe FarmController.
    *
    * @param farmService instancia da camada de servico recebida
    *                    por injecao de dependencia.
+   * @param cropService instancia da camada de servico crops recebida
+   *                    por injecao de dependencia.
    */
   @Autowired
-  public FarmController(FarmService farmService) {
+  public FarmController(FarmService farmService, CropService cropService) {
     this.farmService = farmService;
+    this.cropService = cropService;
   }
 
   /**
@@ -83,6 +91,34 @@ public class FarmController {
     ResponseDto<Farm> responseDto = new ResponseDto<Farm>(
         "Fazenda encontrada com sucesso", farmFound);
     return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+  }
+
+  /**
+   * Rota POST /farmid/crops que salva uma crop em uma farm especificada.
+   *
+   * @param farmId id da Farm
+   * @param cropsDto camada Dto para a criacao de crops
+   * @return retorna uma CropResponseDto com somente as informacoes da Crop
+   *     omitindo informacoes da farm.
+   */
+  @PostMapping("/{farmId}/crops")
+  public ResponseEntity<ResponseDto> createCropByFarmId(@PathVariable Long farmId, @RequestBody
+      CropsDto cropsDto) {
+    Optional<Farm> farmToSave = this.farmService.getFarmById(farmId);
+
+    if (farmToSave.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+          new ResponseDto("Fazenda não encontrada!", null));
+    }
+
+    Farm farmFound = farmToSave.get();
+    Crop cropToSave = cropsDto.toCrop(farmFound);
+    Crop cropSaved = this.cropService.saveCropByFarmId(cropToSave);
+    CropResponseDto cropResponseDto = new CropResponseDto(
+        cropSaved.getId(), cropSaved.getName(),
+        cropSaved.getPlantedArea(), cropSaved.getFarm().getId());
+    ResponseDto okResponse = new ResponseDto("Plantacao registrada", cropResponseDto);
+    return ResponseEntity.status(HttpStatus.CREATED).body(okResponse);
   }
 
 }

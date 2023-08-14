@@ -1,10 +1,13 @@
 package com.betrybe.agrix.model.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.List;
 
 /**
  * Entidade Farm do banco de dados.
@@ -21,6 +24,10 @@ public class Farm {
   private String name;
 
   private Double size;
+
+  @OneToMany(mappedBy = "farm")
+  @JsonIgnore
+  private List<Crop> crops;
 
   public Farm() {}
 
@@ -56,4 +63,14 @@ public class Farm {
   public void setSize(Double size) {
     this.size = size;
   }
+
+  public void setCrops(List<Crop> crops) {
+    this.crops = crops;
+  }
+
+  public List<Crop> getCrops() {
+    return crops;
+  }
 }
+
+
