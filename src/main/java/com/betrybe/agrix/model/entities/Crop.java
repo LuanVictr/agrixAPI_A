@@ -30,6 +30,8 @@ public class Crop {
   @Column(name = "planted_Area")
   private Double plantedArea;
 
+  public Crop() {}
+
   /**
    * Construtor da entidade Crop.
    *

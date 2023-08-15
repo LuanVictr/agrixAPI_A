@@ -3,7 +3,6 @@ package com.betrybe.agrix.controller;
 import com.betrybe.agrix.controller.dto.CropResponseDto;
 import com.betrybe.agrix.controller.dto.CropsDto;
 import com.betrybe.agrix.controller.dto.FarmDto;
-import com.betrybe.agrix.controller.dto.ResponseDto;
 import com.betrybe.agrix.exceptions.FarmNotFoundException;
 import com.betrybe.agrix.model.entities.Crop;
 import com.betrybe.agrix.model.entities.Farm;
@@ -11,8 +10,8 @@ import com.betrybe.agrix.service.CropService;
 import com.betrybe.agrix.service.FarmService;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.actuate.autoconfigure.observation.ObservationProperties.Http;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -104,23 +103,55 @@ public class FarmController {
    *     omitindo informacoes da farm.
    */
   @PostMapping("/{farmId}/crops")
-  public ResponseEntity<ResponseDto> createCropByFarmId(@PathVariable Long farmId, @RequestBody
+  public ResponseEntity createCropByFarmId(@PathVariable Long farmId, @RequestBody
       CropsDto cropsDto) {
-    Optional<Farm> farmToSave = this.farmService.getFarmById(farmId);
+    try {
+      Optional<Farm> farmToSave = this.farmService.getFarmById(farmId);
 
-    if (farmToSave.isEmpty()) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-          new ResponseDto("Fazenda não encontrada!", null));
+      if (farmToSave.isEmpty()) {
+        throw new FarmNotFoundException();
+      }
+
+      Farm farmFound = farmToSave.get();
+      Crop cropToSave = cropsDto.toCrop(farmFound);
+      Crop cropSaved = this.cropService.saveCropByFarmId(cropToSave);
+
+      CropResponseDto cropResponseDto = new CropResponseDto(
+          cropSaved.getId(), cropSaved.getName(),
+          cropSaved.getPlantedArea(), cropSaved.getFarm().getId());
+
+      return ResponseEntity.status(HttpStatus.CREATED).body(cropResponseDto);
+
+    } catch (FarmNotFoundException farmNotFoundException) {
+
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(farmNotFoundException.getMessage());
+
     }
-
-    Farm farmFound = farmToSave.get();
-    Crop cropToSave = cropsDto.toCrop(farmFound);
-    Crop cropSaved = this.cropService.saveCropByFarmId(cropToSave);
-    CropResponseDto cropResponseDto = new CropResponseDto(
-        cropSaved.getId(), cropSaved.getName(),
-        cropSaved.getPlantedArea(), cropSaved.getFarm().getId());
-    ResponseDto okResponse = new ResponseDto("Plantacao registrada", cropResponseDto);
-    return ResponseEntity.status(HttpStatus.CREATED).body(okResponse);
   }
 
+  /**
+   * Método que mapea a rota /farmId/crops e retorna todas as plantacoes
+   * que uma fazenda possui.
+   *
+   * @param farmId id da fazenda buscada recebida por parametro.
+   * @return retorna uma Lista com todas as crops ou uma excecao de fazenda
+   *     nao encontrada
+   */
+  @GetMapping("/{farmId}/crops")
+  public ResponseEntity getAllCropsFromFarm(@PathVariable Long farmId) {
+    try {
+
+      List<Crop> allCrops = this.farmService.getAllCropsFromFarm(farmId);
+      List<CropResponseDto> allCropsResponse = allCrops.stream().map(
+          crop -> new CropResponseDto(crop.getId(), crop.getName(),
+          crop.getPlantedArea(), crop.getFarm().getId())).collect(Collectors.toList());
+
+      return ResponseEntity.status(HttpStatus.OK).body(allCropsResponse);
+
+    } catch (FarmNotFoundException farmNotFoundException) {
+
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(farmNotFoundException.getMessage());
+
+    }
+  }
 }
