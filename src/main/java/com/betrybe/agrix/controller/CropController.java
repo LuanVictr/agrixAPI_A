@@ -2,15 +2,18 @@ package com.betrybe.agrix.controller;
 
 import com.betrybe.agrix.controller.dto.CropResponseDto;
 import com.betrybe.agrix.controller.dto.CropsDto;
+import com.betrybe.agrix.exceptions.CropNotFoundException;
 import com.betrybe.agrix.model.entities.Crop;
 import com.betrybe.agrix.service.CropService;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -50,5 +53,31 @@ public class CropController {
         .toList();
 
     return ResponseEntity.status(HttpStatus.OK).body(cropsResponse);
+  }
+
+  /**
+   * Mapea a rota GET /crops/id para retornar as informacoes de uma crop
+   * especifica.
+   *
+   * @param id id da crop buscada passada por Path
+   * @return retorna um ResponseEntity com a crop especifica ou um erro
+   *     customizado caso ela nao seja encontrada.
+   */
+  @GetMapping("/{id}")
+  public ResponseEntity getCropById(@PathVariable Long id) {
+    try {
+
+      Crop cropFound = this.cropService.getCropById(id);
+
+      CropResponseDto cropResponse = new CropResponseDto(cropFound.getId(),
+          cropFound.getName(), cropFound.getPlantedArea(), cropFound.getFarm().getId());
+
+      return ResponseEntity.status(HttpStatus.OK).body(cropResponse);
+
+    } catch (CropNotFoundException cropNotFoundException) {
+
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(cropNotFoundException.getMessage());
+
+    }
   }
 }

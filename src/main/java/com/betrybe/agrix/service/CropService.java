@@ -1,5 +1,6 @@
 package com.betrybe.agrix.service;
 
+import com.betrybe.agrix.exceptions.CropNotFoundException;
 import com.betrybe.agrix.model.entities.Crop;
 import com.betrybe.agrix.model.repositories.CropRepository;
 import java.util.List;
@@ -54,6 +55,22 @@ public class CropService {
     List<Crop> allCrops = this.cropRepository.findAll();
 
     return allCrops;
+  }
+
+  /**
+   * Método que busca plantacao baseada no id.
+   *
+   * @param id recebe o id buscado.
+   * @return retorna um opcional com a plantacao retornada.
+   */
+  public Crop getCropById(Long id) throws CropNotFoundException {
+    Optional<Crop> cropToFound = this.cropRepository.findById(id);
+
+    if (cropToFound.isEmpty()) {
+      throw new CropNotFoundException();
+    }
+
+    return cropToFound.get();
   }
 
 }
