@@ -2,7 +2,9 @@ package com.betrybe.agrix.service;
 
 import com.betrybe.agrix.model.entities.Crop;
 import com.betrybe.agrix.model.repositories.CropRepository;
+import java.util.List;
 import java.util.Optional;
+import jdk.dynalink.linker.LinkerServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,10 +34,26 @@ public class CropService {
    * @return retorna a crop salva.
    */
   public Crop saveCropByFarmId(Crop newCrop) {
+
     Crop cropToCreate = this.cropRepository.save(newCrop);
+
     Optional<Crop> cropToFound = this.cropRepository.findById(cropToCreate.getId());
+
     Crop cropFound = cropToFound.get();
+
     return cropFound;
+
+  }
+
+  /**
+   * Método que busca no banco de dados todas as plantacoes.
+   *
+   * @return retorna uma lista com todas as plantacoes.
+   */
+  public List<Crop> getAllCrops() {
+    List<Crop> allCrops = this.cropRepository.findAll();
+
+    return allCrops;
   }
 
 }
