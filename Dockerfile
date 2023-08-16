@@ -1,6 +1,7 @@
 FROM maven:3-openjdk-17 as build-image
 WORKDIR /to-build-app
 COPY . .
+RUN mvn install
 RUN ./mvnw clean package -DskipTests
 
 FROM eclipse-temurin:17-jre-alpine
